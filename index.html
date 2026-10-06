@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pháp sư Cây Nhị Phân – Đại chiến quái vật</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#e8f1ff; --card:#ffffff; --ink:#1b2440; --muted:#5b6788; --line:#c8d6f0;
+  --sky1:#8fd3ff; --sky2:#dff3ff; --ground:#7cc77f; --stars:0;
+  --me:#5b5bd6; --me-soft:#e4e4ff;
+  --leaf:#1f9d57; --leaf-soft:#d6f3e1;
+  --berry:#e5484d; --berry-soft:#fde2e3;
+  --sun:#ffbf2e; --sun-soft:#fff1c7; --sun-d:#b98100;
+  --sky:#2f7de1; --sky-soft:#dbeafc;
+  --mon:#b04be8;
+  --node:#ffffff; --node-s:#3a4a86; --edge:#8d9bc6;
+  --shadow:0 3px 0 rgba(27,36,64,.10),0 14px 26px -16px rgba(27,36,64,.35);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0f26; --card:#161c3c; --ink:#e9edff; --muted:#9aa5d6; --line:#2b3470;
+    --sky1:#090c28; --sky2:#2b2570; --ground:#1d3a31; --stars:.85;
+    --me:#8c8cff; --me-soft:#262b66;
+    --leaf:#4ad083; --leaf-soft:#173d2c;
+    --berry:#ff6b70; --berry-soft:#4a2230;
+    --sun:#ffd04d; --sun-soft:#463a14; --sun-d:#ffd978;
+    --sky:#6fa9ff; --sky-soft:#1c3563;
+    --mon:#d37cff;
+    --node:#1f2850; --node-s:#9db0ff; --edge:#5d6aa6;
+    --shadow:0 3px 0 rgba(0,0,0,.3),0 14px 26px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0f26; --card:#161c3c; --ink:#e9edff; --muted:#9aa5d6; --line:#2b3470;
+  --sky1:#090c28; --sky2:#2b2570; --ground:#1d3a31; --stars:.85;
+  --me:#8c8cff; --me-soft:#262b66;
+  --leaf:#4ad083; --leaf-soft:#173d2c;
+  --berry:#ff6b70; --berry-soft:#4a2230;
+  --sun:#ffd04d; --sun-soft:#463a14; --sun-d:#ffd978;
+  --sky:#6fa9ff; --sky-soft:#1c3563;
+  --mon:#d37cff;
+  --node:#1f2850; --node-s:#9db0ff; --edge:#5d6aa6;
+  --shadow:0 3px 0 rgba(0,0,0,.3),0 14px 26px -16px rgba(0,0,0,.7);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+[hidden]{display:none!important}
+body{
+  margin:0;background:var(--bg);color:var(--ink);min-height:100vh;
+  font:500 16px/1.55 'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+.app{max-width:880px;margin:0 auto;padding:14px 14px 56px}
+h1,h2,h3,h4,.disp{font-family:'Baloo 2','Be Vietnam Pro',system-ui,sans-serif;margin:0;line-height:1.1}
+
+.btn{
+  font:700 15px/1.2 'Be Vietnam Pro',system-ui,sans-serif;color:#fff;background:var(--me);
+  border:0;border-bottom:4px solid rgba(0,0,0,.28);border-radius:14px;padding:12px 18px;cursor:pointer;
+  transition:transform .08s,filter .15s;
+}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(3px);border-bottom-width:1px;margin-bottom:3px}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line);border-bottom-width:4px}
+.btn.sm{padding:7px 12px;font-size:13px;border-radius:11px}
+.btn.go{background:var(--leaf)}
+.btn.sun{background:var(--sun);color:#3b2a00}
+.btn.red{background:var(--berry)}
+:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+
+/* ---------- map ---------- */
+.hero{text-align:center;padding:10px 0 18px}
+.hero .big{font-size:64px;line-height:1;filter:drop-shadow(0 4px 0 rgba(0,0,0,.15))}
+.hero h1{font-size:36px;font-weight:800;margin-top:6px}
+.hero p{margin:6px auto 0;max-width:52ch;color:var(--muted)}
+.path{display:flex;flex-direction:column;gap:0;margin-top:8px}
+.stage{display:grid;grid-template-columns:76px 1fr auto;gap:14px;align-items:center;text-align:left;width:100%;
+  background:var(--card);border:2px solid var(--line);border-bottom-width:5px;border-radius:20px;padding:12px 16px;color:var(--ink);
+  font:inherit;cursor:pointer;box-shadow:var(--shadow)}
+.stage:hover:not(.lock){border-color:var(--me)}
+.stage .em{font-size:48px;text-align:center;line-height:1}
+.stage h3{font-size:21px;font-weight:800}
+.stage p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.stage .meta{text-align:right;font-size:13px;color:var(--muted)}
+.stage .st{color:var(--sun-d);font-size:19px;letter-spacing:2px;display:block}
+.stage.lock{opacity:.55;cursor:not-allowed}
+.stage.lock .em{filter:grayscale(1)}
+.link{width:6px;height:16px;margin:0 auto;background:repeating-linear-gradient(var(--line) 0 4px,transparent 4px 8px)}
+.foot{margin-top:18px;text-align:center}
+.foot button{background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer;font:inherit;font-size:14px}
+
+/* ---------- intro ---------- */
+.intro{display:grid;gap:14px}
+.meet{display:flex;gap:16px;align-items:center}
+.meet .em{font-size:84px;line-height:1;animation:bob 2.4s ease-in-out infinite}
+.say{position:relative;background:var(--sun-soft);border:2px solid var(--sun);border-radius:18px;padding:10px 14px;font-weight:600}
+.say::before{content:'';position:absolute;left:-10px;top:22px;border:8px solid transparent;border-right-color:var(--sun);border-left:0}
+.cheat h3{font-size:22px;margin-bottom:6px}
+.cheat ul{margin:0;padding-left:20px}
+.cheat li{margin:5px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+code,.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background:var(--me-soft);padding:1px 6px;border-radius:6px}
+
+/* ---------- battle ---------- */
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.bar strong{flex:1;font-family:'Baloo 2',sans-serif;font-size:19px}
+.arena{
+  position:relative;border-radius:24px;border:3px solid var(--line);overflow:hidden;
+  background:linear-gradient(var(--sky1),var(--sky2) 60%,var(--ground) 60%);
+  padding:12px 12px 12px;min-height:236px;display:flex;justify-content:space-between;align-items:flex-end;box-shadow:var(--shadow);
+}
+.arena::before{
+  content:'';position:absolute;inset:0;opacity:var(--stars);pointer-events:none;
+  background-image:
+    radial-gradient(2px 2px at 12% 18%,#fff,transparent),radial-gradient(2px 2px at 30% 40%,#fff,transparent),
+    radial-gradient(1.5px 1.5px at 52% 14%,#fff,transparent),radial-gradient(2px 2px at 70% 30%,#fff,transparent),
+    radial-gradient(1.5px 1.5px at 88% 12%,#fff,transparent),radial-gradient(2px 2px at 94% 44%,#fff,transparent),
+    radial-gradient(1.5px 1.5px at 22% 8%,#fff,transparent);
+}
+.arena.quake{animation:quake .45s}
+.side{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;width:44%}
+.hpbox{width:100%;background:rgba(10,14,40,.62);border-radius:14px;padding:6px 10px;color:#fff}
+.hpbox .nm{font:800 15px 'Baloo 2',sans-serif;display:flex;justify-content:space-between;gap:6px}
+.hp{height:13px;border-radius:9px;background:rgba(255,255,255,.22);overflow:hidden;margin-top:3px}
+.hp i{display:block;height:100%;width:100%;background:var(--leaf);transition:width .55s cubic-bezier(.3,1,.4,1),background .3s}
+.hp.low i{background:var(--berry)}
+.mon .hp i{background:var(--mon)}
+.hpbox small{display:block;font-size:12px;opacity:.85;margin-top:2px}
+.fig{font-size:78px;line-height:1;transition:transform .5s,opacity .5s,filter .2s;user-select:none}
+.mon .fig{font-size:92px;animation:bob 2.2s ease-in-out infinite}
+.player .fig{animation:bob 2.8s ease-in-out infinite}
+.fig.hit{animation:hit .45s}
+.fig.dead{animation:none!important;transform:rotate(80deg) translateY(30px) scale(.8);opacity:.15}
+.bubble{
+  position:absolute;top:-6px;left:50%;transform:translate(-50%,-100%);white-space:nowrap;z-index:3;
+  background:#fff;color:#1b2440;border-radius:12px;padding:3px 10px;font:700 13px 'Be Vietnam Pro',sans-serif;opacity:0;transition:opacity .2s;pointer-events:none
+}
+.bubble.on{opacity:1}
+#fx{position:absolute;inset:0;pointer-events:none;z-index:4}
+.proj{position:absolute;font-size:34px;line-height:1}
+.dmg{position:absolute;font:800 28px 'Baloo 2',sans-serif;color:var(--berry);text-shadow:0 2px 0 #fff,0 0 8px #fff;animation:floatUp 1s ease-out forwards;transform:translateX(-50%)}
+.dmg.crit{color:#ff9d00;font-size:36px}
+.dmg.heal{color:var(--leaf)}
+.combo{font-weight:800;color:#ff7a1a}
+
+.q{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.qtext{font:700 18px/1.4 'Be Vietnam Pro',sans-serif;margin:0}
+pre.code{margin:0;background:#101530;color:#d7e0ff;border-radius:14px;padding:12px 14px;font:13.5px/1.5 ui-monospace,Menlo,Consolas,monospace;overflow-x:auto}
+.treebox{background:var(--bg);border:2px dashed var(--line);border-radius:18px;padding:6px;min-height:110px}
+.opts{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(max-width:560px){.opts{grid-template-columns:1fr}}
+.opt{
+  display:flex;gap:10px;align-items:flex-start;text-align:left;font:600 15px/1.4 'Be Vietnam Pro',sans-serif;color:var(--ink);background:var(--card);
+  border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:10px 12px;cursor:pointer;transition:transform .08s
+}
+.opt b{flex:none;width:26px;height:26px;border-radius:8px;background:var(--me-soft);color:var(--me);display:grid;place-items:center;font-size:13px}
+.opt:hover:not(:disabled){border-color:var(--me)}
+.opt.ok{background:var(--leaf-soft);border-color:var(--leaf)}
+.opt.bad{background:var(--berry-soft);border-color:var(--berry)}
+.opt.gone{opacity:.28;text-decoration:line-through}
+.opt:disabled{cursor:default}
+.exp{border-radius:16px;padding:12px 14px;border-left:7px solid var(--leaf);background:var(--leaf-soft)}
+.exp.bad{border-color:var(--berry);background:var(--berry-soft)}
+.exp h4{font-size:20px;margin-bottom:4px}
+.exp .body{font-size:15px}
+.exp .body p{margin:4px 0}
+.qfoot{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+
+/* tree svg */
+svg{display:block;margin:0 auto;width:100%;height:auto}
+.edge{stroke:var(--edge);stroke-width:3;stroke-linecap:round}
+.edge-g{stroke-dasharray:3 6;opacity:.55;stroke-width:2}
+.nd{cursor:pointer}
+.nd circle{fill:var(--node);stroke:var(--node-s);stroke-width:3;transition:fill .2s,stroke .2s}
+.nd text{font:800 15px 'Baloo 2','Be Vietnam Pro',sans-serif;fill:var(--ink);pointer-events:none}
+.nd:hover circle{stroke:var(--sun)}
+.nd.done circle,.nd.found circle{fill:var(--leaf);stroke:var(--leaf)}
+.nd.done text,.nd.found text{fill:#fff}
+.nd.cur circle{fill:var(--sun-soft);stroke:var(--sun);stroke-width:5}
+.nd.visited circle{fill:var(--sky-soft);stroke:var(--sky)}
+.nd.hint circle{stroke:var(--sky);stroke-width:6;fill:var(--sky-soft)}
+.nd.wrong{animation:shake .4s}
+.nd.wrong circle{fill:var(--berry-soft);stroke:var(--berry)}
+.slot{cursor:pointer}
+.slot circle{fill:transparent;stroke:var(--leaf);stroke-width:2.5;stroke-dasharray:4 4}
+.slot text{font:700 22px 'Baloo 2',sans-serif;fill:var(--leaf)}
+.slot:hover circle{fill:var(--leaf-soft)}
+.slot.hint circle{stroke:var(--sun);fill:var(--sun-soft);stroke-dasharray:none;stroke-width:4}
+.slot.wrong{animation:shake .4s}
+.slot.wrong circle{stroke:var(--berry);fill:var(--berry-soft)}
+.nul rect{fill:var(--leaf-soft);stroke:var(--leaf);stroke-width:2}
+.nul.hl rect{fill:var(--sun);stroke:var(--sun-d)}
+.ptr{fill:var(--berry)}
+
+/* ---------- result ---------- */
+.res{text-align:center}
+.res .big{font-size:76px;line-height:1}
+.res h2{font-size:34px;font-weight:800;margin:6px 0}
+.res .stars{font-size:42px;letter-spacing:6px;color:var(--sun-d)}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0}
+.stats span{background:var(--me-soft);border-radius:999px;padding:4px 14px;font-weight:700;font-size:14px}
+.mist{text-align:left;margin-top:14px}
+.mist h3{font-size:20px;margin-bottom:6px}
+.mist details{background:var(--bg);border:2px solid var(--line);border-radius:14px;padding:6px 12px;margin:6px 0}
+.mist summary{cursor:pointer;font-weight:700}
+.mist .body{padding:6px 0;font-size:15px}
+
+/* ---------- overlay ---------- */
+#ov{position:fixed;inset:0;background:rgba(5,8,25,.62);z-index:20;display:grid;place-items:center;padding:16px}
+#ov .card{max-width:560px;width:100%;max-height:85vh;overflow:auto}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes quake{0%,100%{transform:translate(0)}20%{transform:translate(-7px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-5px,2px)}80%{transform:translate(4px,-2px)}}
+@keyframes hit{0%{transform:translateX(0);filter:brightness(1)}20%{transform:translateX(-10px);filter:brightness(2.4) saturate(2)}50%{transform:translateX(9px)}100%{transform:translateX(0);filter:brightness(1)}}
+@keyframes floatUp{0%{opacity:0;margin-top:0}15%{opacity:1}100%{opacity:0;margin-top:-64px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- MAP -->
+  <section id="s-map">
+    <div class="hero">
+      <div class="big" aria-hidden="true">🧙✨🌳</div>
+      <h1>Pháp sư Cây Nhị Phân</h1>
+      <p>Năm con quái canh giữ khu rừng kiến thức Bài 7. <b>Trả lời đúng</b> để tung phép hạ gục quái, <b>trả lời sai</b> thì bạn bị quái đánh mất máu. Sau mỗi câu đều có lời giải thích.</p>
+    </div>
+    <div class="path" id="path"></div>
+    <div class="foot"><button id="unlockAll">🔓 Mở khóa tất cả màn</button></div>
+  </section>
+
+  <!-- INTRO -->
+  <section id="s-intro" hidden>
+    <div class="intro">
+      <div class="card meet">
+        <div class="em" id="inEm"></div>
+        <div>
+          <h2 id="inName" style="font-size:28px"></h2>
+          <p id="inTopic" style="margin:2px 0 8px;color:var(--muted)"></p>
+          <div class="say" id="inSay"></div>
+        </div>
+      </div>
+      <div class="card cheat" id="inCheat"></div>
+      <div class="row">
+        <button class="btn go" id="inGo">⚔️ Vào trận!</button>
+        <button class="btn ghost" id="inBack">← Bản đồ</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="s-battle" hidden>
+    <div class="bar">
+      <button class="btn ghost sm" id="bMap">🗺️ Bản đồ</button>
+      <strong id="bTitle"></strong>
+      <button class="btn sun sm" id="bCheat">📖 Bí kíp</button>
+    </div>
+    <div class="arena" id="arena">
+      <div class="side player">
+        <div class="hpbox"><div class="nm"><span>Pháp sư</span><span class="combo" id="combo"></span></div><div class="hp" id="pBar"><i id="pHp"></i></div><small id="pTxt"></small></div>
+        <div class="fig" id="plFig" aria-label="Pháp sư">🧙</div>
+        <div class="bubble" id="plSay"></div>
+      </div>
+      <div class="side mon">
+        <div class="hpbox"><div class="nm"><span id="mName"></span></div><div class="hp" id="mBar"><i id="mHp"></i></div><small id="mTxt"></small></div>
+        <div class="fig" id="mnFig" aria-label="Quái vật"></div>
+        <div class="bubble" id="mnSay"></div>
+      </div>
+      <div id="fx"></div>
+    </div>
+
+    <div class="card q">
+      <div class="qfoot">
+        <span id="qnum" style="font-weight:700;color:var(--muted)"></span>
+        <button class="btn ghost sm" id="hintBtn">💡 Gợi ý</button>
+      </div>
+      <p class="qtext" id="qp"></p>
+      <pre class="code" id="qcode" hidden></pre>
+      <div class="treebox" id="qtree" hidden></div>
+      <div id="qopts"></div>
+      <div class="exp" id="qexp" hidden role="status" aria-live="polite"><h4 id="expH"></h4><div class="body" id="expB"></div></div>
+      <div class="qfoot" style="justify-content:flex-end"><button class="btn go" id="qnext" hidden>Câu tiếp theo ➜</button></div>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="s-res" hidden>
+    <div class="card res">
+      <div class="big" id="rEm"></div>
+      <h2 id="rTitle"></h2>
+      <div class="stars" id="rStars"></div>
+      <div class="stats" id="rStats"></div>
+      <p id="rMsg" style="max-width:52ch;margin:6px auto"></p>
+      <div class="row" style="justify-content:center;margin-top:12px" id="rBtns"></div>
+      <div class="mist" id="rMist"></div>
+    </div>
+  </section>
+</div>
+<div id="ov" hidden><div class="card" id="ovCard"></div></div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const rnd=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[rnd(0,a.length-1)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(0,i);[a[i],a[j]]=[a[j],a[i]]}return a};
+const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* ---------- save ---------- */
+const SAVE='phap-su-cay-nhi-phan-v1';
+const G={stars:[0,0,0,0,0],unlocked:1};
+try{const d=JSON.parse(localStorage.getItem(SAVE)||'null');if(d){G.stars=d.stars||G.stars;G.unlocked=d.unlocked||1}}catch(e){}
+const save=()=>{try{localStorage.setItem(SAVE,JSON.stringify(G))}catch(e){}};
+
+/* ---------- tree helpers ---------- */
+let uid=0;
+const mk=v=>({v,l:null,r:null,id:++uid});
+function ins(root,v){
+  if(!root)return mk(v);
+  let p=root;
+  for(;;){
+    if(v<=p.v){if(!p.l){p.l=mk(v);break}p=p.l}
+    else{if(!p.r){p.r=mk(v);break}p=p.r}
+  }
+  return root;
+}
+const height=n=>n?1+Math.max(height(n.l),height(n.r)):0;
+function walk(n,f,d=1){if(!n)return;f(n,d);walk(n.l,f,d+1);walk(n.r,f,d+1)}
+const nodes=root=>{const a=[];walk(root,(n,d)=>a.push({n,d}));return a};
+const deg=n=>(n.l?1:0)+(n.r?1:0);
+const nums=()=>shuffle(Array.from({length:60},(_,i)=>i+1));
+function randTree(n,maxH){
+  let r=null,vals=[];
+  for(let t=0;t<300;t++){
+    vals=nums().slice(0,n);r=null;vals.forEach(v=>r=ins(r,v));
+    const h=height(r);if(h<=maxH&&h>=3)break;
+  }
+  return{root:r,vals};
+}
+function order(root,type){
+  const o=[];
+  (function f(n){
+    if(!n)return;
+    if(type==='pre')o.push(n);
+    f(n.l);
+    if(type==='in')o.push(n);
+    f(n.r);
+    if(type==='post')o.push(n);
+  })(root);
+  return o;
+}
+function route(root,v){
+  const steps=[];
+  let p=root;
+  for(;;){
+    if(v<=p.v){steps.push(v+' ≤ '+p.v+' → đi trái');if(!p.l)return{parent:p,side:'l',steps};p=p.l}
+    else{steps.push(v+' &gt; '+p.v+' → đi phải');if(!p.r)return{parent:p,side:'r',steps};p=p.r}
+  }
+}
+function validBST(n,lo=-Infinity,hi=Infinity){
+  if(!n)return true;
+  if(n.v<=lo||n.v>hi)return false;
+  return validBST(n.l,lo,n.v)&&validBST(n.r,n.v,hi);
+}
+function layout(root,ghosts){
+  let idx=0;const items=[];
+  function rec(n,depth,parent,side){
+    if(!n){
+      if(!ghosts)return null;
+      const it={ghost:true,parent,side,depth,x:idx++};items.push(it);return it;
+    }
+    const it={n,ghost:false,parent,side,depth};
+    it.left=rec(n.l,depth+1,n,'l');
+    it.x=idx++;items.push(it);
+    it.right=rec(n.r,depth+1,n,'r');
+    return it;
+  }
+  rec(root,0,null,null);
+  return{items,count:idx};
+}
+function drawTree(el,root,o){
+  o=o||{};
+  const L=layout(root,o.ghosts);
+  if(!L.items.length){el.innerHTML='';return}
+  const W=44,H=58,Rr=19,pad=22;
+  const maxD=Math.max(...L.items.map(i=>i.depth));
+  const w=L.count*W+pad*2,h=maxD*H+Rr*2+pad+34;
+  const X=i=>pad+i.x*W+W/2,Y=i=>34+i.depth*H+Rr;
+  const cls=o.cls||{};
+  const ptr=(x,y)=>`<path class="ptr" d="M${x-7} ${y-16} L${x+7} ${y-16} L${x} ${y-5}Z"/>`;
+  let s=`<svg viewBox="0 0 ${w} ${h}" style="max-width:${Math.round(Math.max(w*1.3,260))}px" role="group" aria-label="Cây nhị phân">`;
+  L.items.forEach(it=>{
+    if(it.ghost)return;
+    [it.left,it.right].forEach(c=>{
+      if(c)s+=`<line class="edge${c.ghost?' edge-g':''}" x1="${X(it)}" y1="${Y(it)}" x2="${X(c)}" y2="${Y(c)}"/>`;
+    });
+  });
+  L.items.forEach(it=>{
+    const x=X(it),y=Y(it);
+    if(it.ghost){
+      const pid=it.parent?it.parent.id:'root',key=pid+(it.side||'');
+      if(o.ghosts==='slot'){
+        const c=(o.wrongKey===key?' wrong':'')+(o.hintKey===key?' hint':'');
+        s+=`<g class="slot${c}" data-pid="${pid}" data-side="${it.side||''}" tabindex="0" role="button" aria-label="Ô trống"><circle cx="${x}" cy="${y}" r="${Rr-2}"/><text x="${x}" y="${y}" dy=".34em" text-anchor="middle">+</text></g>`;
+      }else{
+        const hl=o.ptr===key;
+        s+=`<g class="nul${hl?' hl':''}"><rect x="${x-8}" y="${y-8}" width="16" height="16" rx="3"/></g>`;
+        if(hl)s+=ptr(x,y-8);
+      }
+    }else{
+      const id=it.n.id;
+      s+=`<g class="nd ${cls[id]||''}" data-id="${id}" tabindex="0" role="button" aria-label="Nút ${it.n.v}"><circle cx="${x}" cy="${y}" r="${Rr}"/><text x="${x}" y="${y}" dy=".35em" text-anchor="middle">${it.n.v}</text></g>`;
+      if(o.ptr===id)s+=ptr(x,y-Rr);
+    }
+  });
+  s+='</svg>';
+  el.innerHTML=s;
+  const act=g=>{
+    if(g.classList.contains('nd')){if(o.onNode)o.onNode(+g.dataset.id)}
+    else if(o.onSlot)o.onSlot(g.dataset.pid,g.dataset.side);
+  };
+  el.onclick=e=>{const g=e.target.closest('g.nd,g.slot');if(g)act(g)};
+  el.onkeydown=e=>{
+    if(e.key==='Enter'||e.key===' '){
+      const g=e.target.closest&&e.target.closest('g.nd,g.slot');
+      if(g){e.preventDefault();act(g)}
+    }
+  };
+}
+
+/* ---------- question content ---------- */
+const TL={
+  pre:['PreOrder (tiền thứ tự)','Node → Left → Right'],
+  in:['InOrder (trung thứ tự)','Left → Node → Right'],
+  post:['PostOrder (hậu thứ tự)','Left → Right → Node']
+};
+function mcq(prompt,correct,wrongs,exp,x){
+  const uniq=[...new Set([correct,...wrongs].map(String))];
+  const ws=uniq.filter(v=>v!==String(correct)).slice(0,3);
+  const opts=shuffle([String(correct),...ws]);
+  return Object.assign({type:'mcq',prompt,opts,ans:opts.indexOf(String(correct)),exp},x||{});
+}
+function mcqFixed(prompt,opts,ans,exp,x){return Object.assign({type:'mcq',prompt,opts,ans,exp},x||{})}
+const list=a=>a.map(n=>n.v).join(', ');
+
+const ST={
+ ST1:[
+  {p:'Nút gốc là nút như thế nào?',c:'Nút không có nút cha',w:['Nút không có nút con','Nút có đúng hai nút con','Nút nằm ở mức thấp nhất'],e:'Nút gốc là nút duy nhất không có cha, nằm ở mức 1 của cây.'},
+  {p:'Nút trung gian là nút như thế nào?',c:'Có cả nút cha và nút con',w:['Không có nút cha','Không có nút con','Chỉ có đúng một nút con'],e:'Nút gốc không có cha, nút lá không có con, còn nút trung gian nằm giữa nên vừa có cha vừa có con.'},
+  {p:'Cây rỗng (null tree) là cây…',c:'không có nút nào',w:['chỉ có nút gốc','chỉ có một nút lá','có nút gốc nhưng không có cây con'],e:'Theo định nghĩa của bài học, tập hợp rỗng (không có nút) gọi là cây rỗng.'},
+  {p:'Rừng (forest) là gì?',c:'Tập hợp hữu hạn các cây phân biệt',w:['Một cây có rất nhiều mức','Một cây không có nút gốc','Một cây chỉ gồm các nút lá'],e:'Nếu bỏ nút gốc của một cây, ta thu được một rừng gồm nhiều cây phân biệt (các cây con).'},
+  {p:'Bậc của cây được tính bằng…',c:'số cây con trên nút gốc',w:['số nút lá của cây','chiều cao của cây','tổng số nút của cây'],e:'Bậc của nút là số cây con trên nút đó; bậc của cây là số cây con trên nút gốc.'},
+  {p:'Theo bài học, mức của nút gốc bằng…',c:'1',w:['0','2','chiều cao của cây'],e:'Mức tính từ nút gốc và nút gốc có mức 1. Chiều cao của cây chính là mức lớn nhất của các nút.'}
+ ],
+ ST2:[
+  {p:'Cây nhị phân là trường hợp đặc biệt của cây, trong đó…',c:'mỗi nút có bậc không quá 2',w:['mỗi nút có đúng 2 con','mỗi nút có bậc không quá 3','cây chỉ có hai mức'],e:'Cây nhị phân có bậc 2: mỗi nút có tối đa hai cây con, gọi là cây con trái và cây con phải.'},
+  {p:'Cấu trúc B_Tree trong bài học gồm những trường nào?',c:'data, con trỏ left, con trỏ right',w:['data, con trỏ cha, con trỏ con','chỉ data và một mảng N con trỏ','data và chỉ số mức'],e:'Cây nhị phân được khai báo bằng danh sách liên kết kép: mỗi nút có data, con trỏ left và con trỏ right.'},
+  {p:'Hàm CreateNode gán left và right của nút mới bằng gì?',c:'NULL',w:['value','root','0 và 1'],e:'Nút mới tạo chưa có con nên left = right = NULL, còn data = value.'},
+  {p:'Hàm Insert_Left chèn nút mới vào đâu?',c:'Đi xuống con trái liên tục, gắn vào bên trái của nút trái cùng',w:['Gắn ngay bên phải của gốc','Gắn vào nút lá bất kỳ','Luôn thay thế nút gốc'],e:'Hàm dùng vòng while (lnode->left != NULL) để xuống nút trái cùng, rồi gắn nút mới vào lnode->left.'},
+  {p:'Nếu cây nhị phân có N nút và chiều cao h thì…',c:'h ≥ log2(N)',w:['h ≤ log2(N)','h = N','h = 2N'],e:'Cây có chiều cao h chứa tối đa 2^h − 1 nút, nên để chứa N nút thì chiều cao phải đủ lớn: h ≥ log2(N).'}
+ ],
+ ST3:[
+  {p:'PostOrder (hậu thứ tự) duyệt theo thứ tự nào?',c:'Left → Right → Node',w:['Node → Left → Right','Left → Node → Right','Right → Left → Node'],e:'Hậu thứ tự: thăm cây con trái, rồi cây con phải, cuối cùng mới đến nút gốc.'},
+  {p:'PreOrder (tiền thứ tự) duyệt theo thứ tự nào?',c:'Node → Left → Right',w:['Left → Node → Right','Left → Right → Node','Right → Node → Left'],e:'Tiền thứ tự: thăm nút gốc trước, rồi đến cây con trái, rồi cây con phải.'},
+  {p:'Trong các hàm duyệt cây đệ quy, khi nào hàm không làm gì?',c:'Khi root == NULL',w:['Khi root là nút gốc','Khi root có hai con','Khi data bằng 0'],e:'Code bọc trong if (root != NULL). Gặp NULL là hết nhánh đó và hàm quay về.'},
+  {p:'Khi duyệt PreOrder, nút nào luôn được in đầu tiên?',c:'Nút gốc',w:['Nút lá trái cùng','Nút lá phải cùng','Nút có giá trị nhỏ nhất'],e:'PreOrder có Node đứng đầu nên gốc luôn được thăm trước tiên.'},
+  {p:'Khi duyệt PostOrder, nút nào luôn được in cuối cùng?',c:'Nút gốc',w:['Nút lá trái cùng','Nút lá phải cùng','Nút có giá trị lớn nhất'],e:'PostOrder có Node đứng cuối nên gốc luôn được thăm sau cùng.'}
+ ],
+ ST4:[
+  {p:'Trong BST, giá trị các nút ở cây con bên trái so với nút gốc là…',c:'nhỏ hơn hoặc bằng nút gốc',w:['lớn hơn nút gốc','luôn bằng nút gốc','không có ràng buộc nào'],e:'Ràng buộc của BST: cây con trái ≤ gốc, cây con phải &gt; gốc, và mọi cây con cũng phải thỏa tính chất đó.'},
+  {p:'Khi chèn vào BST một giá trị bằng với nút đang xét, ta đi…',c:'sang cây con trái',w:['sang cây con phải','xuống cả hai bên','dừng lại, không chèn'],e:'Bài học quy định cây con trái ≤ gốc, nên giá trị bằng nút đang xét sẽ đi sang trái.'},
+  {p:'Khi tìm kiếm trong BST mà con trỏ gặp NULL thì…',c:'giá trị cần tìm không có trong cây',w:['giá trị nằm ở nút gốc','phải quay lại tìm bên cây con kia','giá trị nằm ở nút lá trái cùng'],e:'Hàm Search trả về 0 khi root == NULL: đã hết đường đi mà chưa gặp giá trị.'},
+  {p:'Trong hàm Search, nếu root->data > value thì tiếp tục tìm ở…',c:'cây con trái',w:['cây con phải','cả hai cây con','nút gốc'],e:'data lớn hơn value nghĩa là value nhỏ hơn gốc, nên chỉ có thể nằm ở cây con trái.'},
+  {p:'Xóa nút có hai con trong BST (theo code bài học), giá trị thay thế lấy từ đâu?',c:'Nút trái cùng của cây con phải',w:['Nút phải cùng của cây con trái','Nút gốc của cả cây','Một nút lá bất kỳ'],e:'Code đặt p = root->right rồi đi trái đến hết (nút nhỏ nhất của cây con phải), chép data của p lên nút cần xóa, rồi xóa nút p.'},
+  {p:'Xóa nút không có con trái trong BST thì làm thế nào?',c:'Cho con trỏ trỏ tới con phải của nó rồi free nút',w:['Xóa luôn cả cây con phải','Thay bằng nút gốc','Không thể xóa'],e:'Trường hợp không có con trái: temp = *root; *root = (*root)->right; free(temp). Cây con phải được nối lên thay vị trí nút bị xóa.'}
+ ]
+};
+function stat(pool){
+  B.st=B.st||{};
+  if(!B.st[pool]||!B.st[pool].length)B.st[pool]=shuffle(ST[pool]);
+  const s=B.st[pool].pop();
+  return mcq(s.p,s.c,s.w,s.e);
+}
+function heapTree(idxs){
+  const vals=nums().slice(0,idxs.length),map={};
+  idxs.forEach((ix,k)=>map[ix]=mk(vals[k]));
+  idxs.forEach(ix=>{if(ix>1){const p=map[Math.floor(ix/2)];if(ix%2===0)p.l=map[ix];else p.r=map[ix]}});
+  return map[1];
+}
+const range=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+
+const GEN={
+  height(){
+    const t=randTree(rnd(6,9),5),h=height(t.root);
+    return mcq('Chiều cao của cây này là bao nhiêu? (mức của nút gốc là 1)',h,[h-1,h+1,h+2],`Mức của gốc là 1, nút sâu nhất nằm ở mức <b>${h}</b>. Chiều cao của cây là mức cao nhất của các nút nên bằng ${h}.`,{root:t.root});
+  },
+  leaves(){
+    const t=randTree(rnd(6,9),5),L=nodes(t.root).filter(x=>!x.n.l&&!x.n.r).map(x=>x.n);
+    return mcq('Cây này có bao nhiêu nút lá?',L.length,[L.length-1,L.length+1,L.length+2,L.length+3].filter(x=>x>0),`Nút lá là nút không có nút con. Các nút lá ở đây: <b>${list(L)}</b> (tổng ${L.length} nút).`,{root:t.root});
+  },
+  degree(){
+    const t=randTree(rnd(6,8),5),x=pick(nodes(t.root)).n,d=deg(x);
+    return mcq(`Nút được tô vàng (giá trị ${x.v}) có bậc bằng bao nhiêu?`,d,[0,1,2,3].filter(k=>k!==d),`Bậc của nút là số cây con trên nút đó. Nút ${x.v} có <b>${d}</b> cây con ${d===0?'(nó là nút lá)':''}.`,{root:t.root,cls:{[x.id]:'cur'}});
+  },
+  level(){
+    const t=randTree(rnd(6,8),5),it=pick(nodes(t.root));
+    return mcq(`Nút được tô vàng (giá trị ${it.n.v}) nằm ở mức mấy? (gốc là mức 1)`,it.d,[it.d-1,it.d+1,it.d+2,it.d-2,it.d+3].filter(k=>k>0&&k!==it.d),`Đếm từ gốc (mức 1) xuống nút ${it.n.v}, mỗi lần xuống một cạnh thì mức tăng 1. Kết quả: mức <b>${it.d}</b>.`,{root:t.root,cls:{[it.n.id]:'cur'}});
+  },
+  clickLeaf(){
+    const t=randTree(rnd(6,8),5),good=nodes(t.root).filter(x=>deg(x.n)===0).map(x=>x.n);
+    return{type:'node',prompt:'Click vào MỘT nút lá (nút không có nút con).',root:t.root,good:good.map(n=>n.id),exp:`Nút lá là nút không có nút con. Các nút lá của cây này: <b>${list(good)}</b>.`};
+  },
+  clickDeg(){
+    let t,good;
+    do{t=randTree(rnd(6,8),5);good=nodes(t.root).filter(x=>deg(x.n)===2).map(x=>x.n)}while(!good.length);
+    return{type:'node',prompt:'Click vào MỘT nút có bậc 2 (có đủ cả cây con trái và cây con phải).',root:t.root,good:good.map(n=>n.id),exp:`Bậc của nút là số cây con của nó. Các nút có bậc 2 trong cây này: <b>${list(good)}</b>.`};
+  },
+  clickLevel(){
+    const t=randTree(rnd(6,8),5),H=height(t.root),k=rnd(2,H),good=nodes(t.root).filter(x=>x.d===k).map(x=>x.n);
+    return{type:'node',prompt:`Click vào MỘT nút nằm ở mức ${k} (mức của nút gốc là 1).`,root:t.root,good:good.map(n=>n.id),exp:`Mức tính từ gốc (mức 1). Các nút ở mức ${k}: <b>${list(good)}</b>.`};
+  },
+  maxLevel(){
+    const i=rnd(3,6),c=2**(i-1);
+    return mcq(`Cây nhị phân có tối đa bao nhiêu nút ở mức ${i}?`,c,[2**i,c-1,c+1],`Mỗi nút có tối đa 2 con nên số nút tối đa tăng gấp đôi sau mỗi mức: mức 1 có 1 nút, mức 2 có 2, mức 3 có 4... Công thức 2^(i−1) = 2^${i-1} = <b>${c}</b>.`);
+  },
+  maxTree(){
+    const h=rnd(3,6),c=2**h-1;
+    return mcq(`Cây nhị phân có chiều cao ${h} thì chứa tối đa bao nhiêu nút?`,c,[2**h,2**(h-1),2**h-2],`Cộng số nút tối đa của từng mức: 1 + 2 + 4 + ... + 2^(h−1) = 2^h − 1 = 2^${h} − 1 = <b>${c}</b>.`);
+  },
+  minHeight(){
+    const h=rnd(3,6),N=2**h-1;
+    return mcq(`Một cây nhị phân có ${N} nút. Chiều cao nhỏ nhất có thể có của cây là bao nhiêu?`,h,[h-1,h+1,h+2],`Cây cao h chứa tối đa 2^h − 1 nút. Với ${N} = 2^${h} − 1 nút, cây phải cao ít nhất <b>${h}</b> (đúng khi cây đầy đủ). Đây là ý nghĩa của h ≥ log2(N).`);
+  },
+  leafMax(){
+    const h=rnd(3,6),c=2**(h-1);
+    return mcq(`Cây nhị phân cao ${h} có tối đa bao nhiêu nút lá?`,c,[2**h,c-1,h,2*h],`Nút lá nhiều nhất khi tất cả nút ở mức cuối đều đầy, tức là 2^(h−1) = 2^${h-1} = <b>${c}</b>.`);
+  },
+  shape(){
+    const kind=pick(['full','complete','near']);
+    let idxs,h;
+    if(kind==='full'){h=pick([2,3]);idxs=range(1,2**h-1)}
+    else if(kind==='complete'){h=pick([3,4]);const m=rnd(1,2**(h-1)-1);idxs=[...range(1,2**(h-1)-1),...range(2**(h-1),2**(h-1)+m-1)]}
+    else{
+      h=pick([3,3,4]);const base=range(1,2**(h-1)-1),slots=range(2**(h-1),2**h-1);let sub;
+      do{sub=slots.filter(()=>Math.random()<.5)}while(!sub.length||sub.length===slots.length||sub.every((v,i)=>v===slots[i]));
+      idxs=[...base,...sub];
+    }
+    const root=heapTree(idxs);
+    const ex={
+      full:'Mọi mức đều có số nút tối đa nên đây là cây <b>đầy đủ</b>.',
+      complete:'Các mức trên mức cuối đều đầy, còn mức cuối có các nút dồn đều về phía trái nhưng chưa đủ, nên đây là cây <b>hoàn chỉnh</b>.',
+      near:'Các mức trên mức cuối đều đầy, nhưng ở mức cuối các nút không dồn đều về bên trái (có chỗ hở), nên đây là cây <b>gần đầy</b>.'
+    }[kind];
+    return mcqFixed('Cây nhị phân này thuộc loại nào?',['Cây nhị phân đầy đủ','Cây nhị phân hoàn chỉnh (chưa đầy)','Cây nhị phân gần đầy'],['full','complete','near'].indexOf(kind),ex,{root});
+  },
+  travMcq(){
+    const t=randTree(rnd(5,6),4),type=pick(['pre','in','post']);
+    const val=ty=>order(t.root,ty).map(n=>n.v);
+    const c=val(type).join('-');
+    const wr=['pre','in','post'].filter(x=>x!==type).map(x=>val(x).join('-'));
+    const sw=val(type);const i=rnd(0,sw.length-2);[sw[i],sw[i+1]]=[sw[i+1],sw[i]];
+    return mcq(`Kết quả duyệt ${TL[type][0]} (${TL[type][1]}) của cây này là gì?`,c,[...wr,sw.join('-')],`${TL[type][0]} thăm theo thứ tự <b>${TL[type][1]}</b> ở mọi cây con, cho kết quả <b>${c}</b>.`,{root:t.root});
+  },
+  nthClick(){
+    const t=randTree(rnd(5,7),4),type=pick(['pre','in','post']),ord=order(t.root,type),k=rnd(2,ord.length);
+    const which=k===ord.length?'CUỐI CÙNG':'THỨ '+k;
+    return{type:'node',prompt:`Duyệt ${TL[type][0]} (${TL[type][1]}): click vào nút được thăm ${which}.`,root:t.root,good:[ord[k-1].id],exp:`Thứ tự ${TL[type][0]}: <b>${ord.map(n=>n.v).join(' - ')}</b>. Nút được thăm ${which.toLowerCase()} là <b>${ord[k-1].v}</b>.`};
+  },
+  codeQ(){
+    const ty=pick(['pre','in','post']);
+    const P='printf("%d-", root->data);',Lc='Func(root->left);',Rc='Func(root->right);';
+    const seq={pre:[P,Lc,Rc],in:[Lc,P,Rc],post:[Lc,Rc,P]}[ty];
+    const code=`void Func(B_Tree_Type root)\n{\n    if (root != NULL)\n    {\n${seq.map(s=>'        '+s).join('\n')}\n    }\n}`;
+    const nm=['pre','in','post'].map(x=>TL[x][0]);
+    const why={pre:'in dữ liệu của nút trước khi gọi đệ quy hai bên',in:'in dữ liệu của nút sau khi duyệt cây con trái và trước cây con phải',post:'in dữ liệu của nút sau khi đã duyệt xong cả hai cây con'}[ty];
+    return mcqFixed('Hàm Func dưới đây duyệt cây theo kiểu nào?',[...nm,'Duyệt theo mức'],['pre','in','post'].indexOf(ty),`Dòng printf nằm ở vị trí quyết định kiểu duyệt: hàm ${why}, nên đây là <b>${TL[ty][0]}</b> (${TL[ty][1]}).`,{code});
+  },
+  rootPos(){
+    const ty=pick(['pre','in','post']);
+    const o=['Đầu tiên','Giữa cây con trái và cây con phải','Cuối cùng','Tùy hình dạng cây'];
+    return mcqFixed(`Khi duyệt ${TL[ty][0]} (${TL[ty][1]}), nút gốc của một cây được thăm vào lúc nào?`,o,{pre:0,in:1,post:2}[ty],`Chữ Node nằm ở vị trí ${{pre:'đầu',in:'giữa',post:'cuối'}[ty]} trong ${TL[ty][1]}, nên nút gốc được thăm <b>${o[{pre:0,in:1,post:2}[ty]].toLowerCase()}</b>.`);
+  },
+  bstValid(){
+    const t=randTree(rnd(7,8),4);let note='';
+    if(Math.random()<.55){
+      const cand=[];
+      (function f(n,anc){
+        if(!n)return;
+        if(anc.length>=2)cand.push({n,anc});
+        f(n.l,[...anc,{n,dir:'l'}]);f(n.r,[...anc,{n,dir:'r'}]);
+      })(t.root,[]);
+      if(cand.length){
+        const it=pick(cand),a=pick(it.anc.slice(0,-1)),x=it.n;
+        if(a.dir==='l'){x.v=a.n.v+rnd(1,4);note=`Nút ${x.v} nằm trong cây con TRÁI của ${a.n.v} nhưng lại lớn hơn ${a.n.v}.`}
+        else{x.v=Math.max(0,a.n.v-rnd(0,3));note=`Nút ${x.v} nằm trong cây con PHẢI của ${a.n.v} nhưng lại nhỏ hơn hoặc bằng ${a.n.v}.`}
+      }
+    }
+    const ok=validBST(t.root);
+    return mcqFixed('Cây nhị phân này có phải là cây tìm kiếm nhị phân (BST) hợp lệ không?',['Có, đây là BST hợp lệ','Không, đây không phải BST'],ok?0:1,
+      ok?'Ở mọi nút, toàn bộ cây con trái đều ≤ nút đó và toàn bộ cây con phải đều &gt; nút đó, nên đây là BST hợp lệ.':`Vi phạm ràng buộc: ${note} Ràng buộc BST áp dụng cho <b>mọi nút trong cây con</b>, không chỉ nút con trực tiếp.`,{root:t.root});
+  },
+  insertSlot(){
+    let t,vals;
+    do{vals=nums().slice(0,rnd(4,6));t=null;vals.forEach(v=>t=ins(t,v))}while(height(t)>4);
+    let v;
+    if(Math.random()<.25)v=pick(vals);else do{v=rnd(1,60)}while(vals.includes(v));
+    const r=route(t,v);
+    return{type:'slot',prompt:`Chèn giá trị ${v} vào BST này: click vào ô trống (+) đúng vị trí. Nhớ: ≤ đi trái, &gt; đi phải.`.replace('&gt;','>'),root:t,key:r.parent.id+r.side,exp:`So sánh từ gốc xuống: ${r.steps.join('; ')}. Gặp ô trống (NULL) nên chèn ${v} vào đúng ô đó.`};
+  },
+  searchStep(){
+    const t=randTree(rnd(6,8),4),absent=Math.random()<.4;
+    let target;
+    if(absent){do{target=rnd(1,60)}while(t.vals.includes(target))}else target=pick(t.vals);
+    const path=[];let p=t.root;
+    while(p){path.push(p);if(p.v===target)break;p=target<p.v?p.l:p.r}
+    const endsNull=path[path.length-1].v!==target;
+    const states=path.length+(endsNull?1:0),s=rnd(0,states-1);
+    const cls={};
+    for(let i=0;i<Math.min(s,path.length);i++)cls[path[i].id]='visited';
+    const opts=['Đi sang cây con trái','Đi sang cây con phải','Đã tìm thấy','Kết luận: không có trong cây'];
+    if(s<path.length){
+      const q=path[s];cls[q.id]='cur';
+      let a,e;
+      if(q.v===target){a=2;e=`p-&gt;data == value (${q.v} = ${target}) nên đã <b>tìm thấy</b>.`}
+      else if(target<q.v){a=0;e=`${target} &lt; ${q.v} (tức data &gt; value) nên giá trị chỉ có thể nằm ở cây con <b>trái</b>.`}
+      else{a=1;e=`${target} &gt; ${q.v} nên giá trị chỉ có thể nằm ở cây con <b>phải</b>.`}
+      return mcqFixed(`Đang tìm giá trị ${target}. Con trỏ p đang ở nút ${q.v} (mũi tên đỏ). Việc cần làm tiếp theo là gì?`,opts,a,e,{root:t.root,cls,ptr:q.id,ghosts:'null'});
+    }
+    const last=path[path.length-1],side=target<last.v?'l':'r';
+    return mcqFixed(`Đang tìm giá trị ${target}. Con trỏ p vừa đi tới ô vuông vàng (NULL). Kết luận là gì?`,opts,3,`p = NULL nghĩa là đã hết đường mà chưa gặp ${target}, nên <b>giá trị không có trong cây</b> (hàm Search trả về 0).`,{root:t.root,cls,ptr:last.id+side,ghosts:'null'});
+  },
+  bstSeqIn(){
+    const vals=nums().slice(0,rnd(5,6));let t=null;vals.forEach(v=>t=ins(t,v));
+    const sorted=vals.slice().sort((a,b)=>a-b);
+    return mcq(`Chèn lần lượt dãy ${vals.join(', ')} vào một BST rỗng, rồi duyệt InOrder. Kết quả là gì?`,sorted.join('-'),[vals.join('-'),sorted.slice().reverse().join('-'),order(t,'pre').map(n=>n.v).join('-')],`InOrder (Left → Node → Right) trên BST luôn đi từ nhỏ đến lớn, nên cho dãy tăng dần <b>${sorted.join('-')}</b> dù thứ tự chèn ra sao.`);
+  },
+  bstSeqHeight(){
+    const n=rnd(4,6),s=rnd(1,40),vals=range(s,s+n-1);
+    const best=Math.ceil(Math.log2(n+1));
+    return mcq(`Chèn lần lượt ${vals.join(', ')} (tăng dần) vào một BST rỗng. Chiều cao của cây là bao nhiêu?`,n,[best,n-1,n+1,n+2],`Mỗi giá trị mới đều lớn hơn tất cả giá trị trước nên luôn đi sang phải, cây thành một đường thẳng cao <b>${n}</b>. Đây là trường hợp xấu nhất: tìm kiếm phải so sánh tới ${n} lần thay vì khoảng ${best} lần nếu cây cân đối.`);
+  },
+  st1:()=>stat('ST1'),st2:()=>stat('ST2'),st3:()=>stat('ST3'),st4:()=>stat('ST4')
+};
+const P1=['height','leaves','degree','level','clickLeaf','clickDeg','clickLevel','st1','st1'];
+const P2=['maxLevel','maxTree','minHeight','leafMax','shape','shape','st2','st2'];
+const P3=['travMcq','travMcq','nthClick','nthClick','codeQ','rootPos','st3'];
+const P4=['bstValid','insertSlot','insertSlot','searchStep','searchStep','bstSeqIn','bstSeqHeight','st4','st4'];
+
+const MON=[
+ {em:'🐛',name:'Sâu Thuật Ngữ',topic:'Khái niệm về cây: bậc, nút lá, mức, chiều cao',hp:60,dmg:20,pool:P1,
+  taunt:'Ngươi có phân biệt nổi nút gốc với nút lá không, hả?',hit:['Ái da!','Đau quá!','Ối!'],win:['Hì hì, sai rồi!','Trúng rồi nhé!'],
+  cheat:['<b>Bậc của nút</b> = số cây con trên nút đó. <b>Bậc của cây</b> = số cây con trên nút gốc.','<b>Nút gốc</b>: không có cha. <b>Nút lá</b>: không có con. <b>Nút trung gian</b>: có cả cha và con.','<b>Mức</b> của nút tính từ gốc, nút gốc là mức 1. <b>Chiều cao</b> của cây = mức lớn nhất.','<b>Cây rỗng</b> không có nút nào. <b>Rừng</b> là tập các cây phân biệt.']},
+ {em:'🦇',name:'Dơi Nhị Phân',topic:'Cây nhị phân: số nút tối đa, đầy đủ, hoàn chỉnh',hp:80,dmg:20,pool:P2,
+  taunt:'Mỗi nút chỉ được có hai con thôi. Ngươi đếm được tối đa bao nhiêu nút?',hit:['Chiiii!','Ối cánh của ta!','Á!'],win:['Chíp chíp, sai!','Đếm lại đi!'],
+  cheat:['Cây nhị phân: mỗi nút có <b>bậc không quá 2</b> (cây con trái và cây con phải).','Số nút tối đa ở mức i: <code>2^(i−1)</code>. Số nút tối đa của cây cao h: <code>2^h − 1</code>.','Chiều cao <code>h ≥ log2(N)</code> với N là số nút.','<b>Đầy đủ</b>: mọi mức đạt tối đa. <b>Hoàn chỉnh</b>: mọi mức đầy trừ mức cuối, mức cuối dồn về trái. <b>Gần đầy</b>: mức cuối không dồn đều về trái.','Khai báo: <code>struct B_Tree { int data; left; right; }</code> (danh sách liên kết kép).']},
+ {em:'🧌',name:'Troll Duyệt Cây',topic:'Ba cách duyệt: PreOrder, InOrder, PostOrder',hp:100,dmg:20,pool:P3,
+  taunt:'Ta thăm cây theo kiểu của ta. Ngươi đoán nổi thứ tự không?',hit:['Gừ!','Ouch!','Rầm!'],win:['Ha ha ha!','Thứ tự sai bét!'],
+  cheat:['<b>PreOrder</b> (tiền thứ tự): Node → Left → Right. Gốc được thăm đầu tiên.','<b>InOrder</b> (trung thứ tự): Left → Node → Right. Trên BST cho dãy tăng dần.','<b>PostOrder</b> (hậu thứ tự): Left → Right → Node. Gốc được thăm cuối cùng.','Trong code, vị trí dòng <code>printf</code> so với hai lời gọi đệ quy quyết định kiểu duyệt. Gặp <code>root == NULL</code> thì dừng.']},
+ {em:'🕷️',name:'Nhện Tìm Kiếm',topic:'Cây tìm kiếm nhị phân: chèn, tìm kiếm, xóa',hp:120,dmg:25,pool:P4,
+  taunt:'Mạng nhện của ta là một BST. Đi sai một nhánh là lạc luôn đấy!',hit:['Tách!','Đứt tơ rồi!','Ái!'],win:['Sa lưới rồi!','Đi nhầm nhánh!'],
+  cheat:['<b>BST</b>: cây con trái ≤ gốc, cây con phải &gt; gốc, và mọi cây con cũng đúng như vậy.','<b>Chèn</b>: so sánh từ gốc, ≤ đi trái, &gt; đi phải, gặp NULL thì gắn nút mới.','<b>Tìm kiếm</b>: bằng thì tìm thấy; data &gt; value đi trái; ngược lại đi phải; gặp NULL thì không có.','<b>Xóa</b>: không có con trái thì nối con phải lên; không có con phải thì nối con trái lên; có hai con thì lấy nút trái cùng của cây con phải thay vào rồi xóa nút đó.','Chèn dãy tăng dần làm cây thành đường thẳng: chiều cao = số nút.']},
+ {em:'🐲',name:'Rồng NULL',topic:'Trùm cuối: tổng hợp toàn bộ Bài 7',hp:180,dmg:25,pool:[...P1,...P2,...P3,...P4].filter((x,i,a)=>a.indexOf(x)===i),
+  taunt:'Ta là NULL, nơi mọi con trỏ kết thúc. Hãy chứng minh ngươi hiểu cây nhị phân!',hit:['GRÀOOO!','Vảy của ta!','Không thể nào!'],win:['Lửa đây!','Con trỏ của ngươi lạc rồi!'],
+  cheat:['Bậc, nút lá, mức (gốc = 1), chiều cao = mức lớn nhất.','Tối đa <code>2^(i−1)</code> nút ở mức i và <code>2^h − 1</code> nút cho cây cao h.','Pre: Node-Left-Right · In: Left-Node-Right · Post: Left-Right-Node.','BST: trái ≤ gốc &lt; phải. InOrder cho dãy tăng dần. Gặp NULL khi tìm kiếm = không có.']}
+];
+
+/* ---------- battle engine ---------- */
+let B=null,cur=0;
+const SCREENS=['map','intro','battle','res'];
+function go(s){SCREENS.forEach(x=>$('#s-'+x).hidden=x!==s);window.scrollTo(0,0)}
+
+function buildMap(){
+  let h='';
+  MON.forEach((m,i)=>{
+    const open=i<G.unlocked,st=G.stars[i]||0;
+    h+=`<button class="stage${open?'':' lock'}" data-i="${i}" ${open?'':'aria-disabled="true"'}>
+      <span class="em" aria-hidden="true">${open?m.em:'🔒'}</span>
+      <span><h3>Màn ${i+1}: ${m.name}</h3><p>${m.topic}</p></span>
+      <span class="meta"><span class="st" aria-label="${st} trên 3 sao">${'★'.repeat(st)+'☆'.repeat(3-st)}</span>Máu quái: ${m.hp}</span>
+    </button>`;
+    if(i<MON.length-1)h+='<div class="link"></div>';
+  });
+  $('#path').innerHTML=h;
+}
+$('#path').onclick=e=>{
+  const b=e.target.closest('.stage');
+  if(!b||b.classList.contains('lock'))return;
+  openIntro(+b.dataset.i);
+};
+$('#unlockAll').onclick=()=>{G.unlocked=MON.length;save();buildMap()};
+
+function openIntro(i){
+  cur=i;const m=MON[i];
+  $('#inEm').textContent=m.em;$('#inName').textContent=m.name;$('#inTopic').textContent=m.topic+' · Máu quái '+m.hp;
+  $('#inSay').textContent='“'+m.taunt+'”';
+  $('#inCheat').innerHTML='<h3>📖 Bí kíp trước trận đánh</h3><ul>'+m.cheat.map(c=>'<li>'+c+'</li>').join('')+'</ul>';
+  go('intro');
+}
+$('#inBack').onclick=()=>go('map');
+$('#inGo').onclick=()=>startBattle(cur);
+$('#bMap').onclick=()=>{go('map')};
+$('#bCheat').onclick=()=>{
+  const m=MON[cur];
+  $('#ovCard').innerHTML='<h3 style="font-size:24px;margin-bottom:8px">📖 Bí kíp: '+m.name+'</h3><ul style="padding-left:20px;margin:0">'+m.cheat.map(c=>'<li style="margin:6px 0">'+c+'</li>').join('')+'</ul><div class="row" style="margin-top:14px"><button class="btn" id="ovClose">Đã hiểu</button></div>';
+  $('#ov').hidden=false;$('#ovClose').onclick=()=>{$('#ov').hidden=true};
+};
+$('#ov').onclick=e=>{if(e.target.id==='ov')$('#ov').hidden=true};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#ov').hidden=true});
+
+function startBattle(i){
+  cur=i;const m=MON[i];
+  B={i,m,pHP:100,mHP:m.hp,combo:0,hints:2,total:0,correct:0,wrongs:[],lastKey:null,q:null,locked:false,st:{},done:false};
+  $('#plFig').className='fig';$('#mnFig').className='fig';
+  $('#mnFig').textContent=m.em;$('#mName').textContent=m.em+' '+m.name;
+  $('#bTitle').textContent='Màn '+(i+1)+': '+m.name;
+  hpUI(true);go('battle');nextQ();
+}
+function hpUI(){
+  const pp=B.pHP,mp=B.mHP/B.m.hp*100;
+  $('#pHp').style.width=pp+'%';$('#pBar').classList.toggle('low',pp<=35);
+  $('#mHp').style.width=mp+'%';$('#mBar').classList.toggle('low',false);
+  $('#pTxt').textContent='Máu: '+pp+'/100';$('#mTxt').textContent='Máu: '+B.mHP+'/'+B.m.hp;
+  $('#combo').textContent=B.combo>=2?'🔥 Combo ×'+B.combo:'';
+  $('#hintBtn').textContent='💡 Gợi ý ('+B.hints+')';
+  $('#hintBtn').disabled=B.hints<=0||B.locked;
+}
+function nextQ(){
+  let key;
+  do{key=pick(B.m.pool)}while(key===B.lastKey&&B.m.pool.length>1);
+  B.lastKey=key;
+  const q=GEN[key]();
+  B.q=q;B.locked=false;B.hintKey=null;
+  q.cls=q.cls||{};
+  $('#qnum').textContent='Câu '+(B.total+1)+' · Đúng '+B.correct+'/'+B.total;
+  $('#qexp').hidden=true;$('#qnext').hidden=true;
+  $('#qp').textContent=q.prompt;
+  const code=$('#qcode');code.hidden=!q.code;if(q.code)code.textContent=q.code;
+  const tb=$('#qtree');tb.hidden=!q.root;
+  const op=$('#qopts');op.onclick=null;op.className='';op.innerHTML='';
+  if(q.type==='mcq'){
+    if(q.root)drawTree(tb,q.root,{cls:q.cls,ptr:q.ptr,ghosts:q.ghosts});
+    op.className='opts';
+    op.innerHTML=q.opts.map((o,i)=>`<button class="opt" data-i="${i}"><b>${'ABCD'[i]}</b><span>${esc(o)}</span></button>`).join('');
+    op.onclick=e=>{const b=e.target.closest('.opt');if(b&&!B.locked&&!b.classList.contains('gone'))answerMcq(+b.dataset.i)};
+  }else if(q.type==='node')drawNode();
+  else drawSlot();
+  hpUI();
+}
+const drawNode=()=>drawTree($('#qtree'),B.q.root,{cls:B.q.cls,onNode:clickNode});
+const drawSlot=(wrong)=>drawTree($('#qtree'),B.q.root,{ghosts:'slot',wrongKey:wrong,hintKey:B.hintKey,onSlot:clickSlot});
+
+function answerMcq(i){
+  const q=B.q,btns=document.querySelectorAll('#qopts .opt');
+  btns.forEach(b=>b.disabled=true);
+  btns[q.ans].classList.add('ok');
+  const ok=i===q.ans;
+  if(!ok)btns[i].classList.add('bad');
+  resolve(ok,ok?'':'Đáp án đúng: <b>'+esc(q.opts[q.ans])+'</b>.');
+}
+function clickNode(id){
+  if(B.locked)return;
+  const q=B.q,ok=q.good.includes(id);
+  Object.keys(q.cls).forEach(k=>{if(q.cls[k]==='hint')delete q.cls[k]});
+  if(ok)q.cls[id]='done';
+  else{q.cls[id]='wrong';q.good.forEach(g=>q.cls[g]='found')}
+  drawTree($('#qtree'),q.root,{cls:q.cls});
+  resolve(ok,'');
+}
+function clickSlot(pid,side){
+  if(B.locked)return;
+  const q=B.q,ok=(pid+side)===q.key;
+  B.hintKey=ok?null:q.key;
+  drawTree($('#qtree'),q.root,{ghosts:'slot',wrongKey:ok?null:pid+side,hintKey:B.hintKey});
+  if(ok){B.hintKey=q.key;drawTree($('#qtree'),q.root,{ghosts:'slot',hintKey:q.key})}
+  resolve(ok,ok?'':'Ô đúng được tô vàng trên cây.');
+}
+$('#hintBtn').onclick=()=>{
+  if(!B||B.locked||B.hints<=0)return;
+  const q=B.q;B.hints--;
+  if(q.type==='mcq'){
+    const wr=q.opts.map((_,i)=>i).filter(i=>i!==q.ans);
+    shuffle(wr).slice(0,2).forEach(i=>{const b=document.querySelectorAll('#qopts .opt')[i];b.classList.add('gone');b.disabled=true});
+  }else if(q.type==='node'){
+    q.cls[q.good[0]]='hint';drawNode();
+  }else{B.hintKey=q.key;drawSlot()}
+  hpUI();
+};
+
+/* effects */
+function say(el,txt){el.textContent=txt;el.classList.add('on');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('on'),1500)}
+function hit(el){el.classList.remove('hit');void el.offsetWidth;el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),460)}
+function pos(el){const a=$('#arena').getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left+r.width/2-a.left,y:r.top+r.height/2-a.top,top:r.top-a.top}}
+function floatTxt(el,txt,cls){
+  const p=pos(el),s=document.createElement('span');
+  s.className='dmg '+(cls||'');s.textContent=txt;s.style.left=p.x+'px';s.style.top=(p.top+10)+'px';
+  $('#fx').appendChild(s);setTimeout(()=>s.remove(),1000);
+}
+function fire(from,to,emoji){
+  return new Promise(res=>{
+    if(reduce){res();return}
+    const a=pos(from),b=pos(to),p=document.createElement('span');
+    p.className='proj';p.textContent=emoji;p.style.left=a.x+'px';p.style.top=a.y+'px';
+    $('#fx').appendChild(p);
+    const an=p.animate([{transform:'translate(-50%,-50%) scale(.7)'},{transform:`translate(calc(-50% + ${b.x-a.x}px),calc(-50% + ${b.y-a.y}px)) scale(1.4)`}],{duration:420,easing:'ease-in'});
+    an.onfinish=()=>{p.remove();res()};
+  });
+}
+
+function resolve(ok,extra){
+  B.locked=true;B.total++;
+  const m=B.m,q=B.q;
+  let dmg=0,crit=false;
+  if(ok){
+    B.correct++;crit=B.combo>=2;dmg=15+5*Math.min(B.combo,4);B.combo++;
+    B.mHP=Math.max(0,B.mHP-dmg);
+    if(crit)B.pHP=Math.min(100,B.pHP+10);
+  }else{
+    B.combo=0;dmg=m.dmg;B.pHP=Math.max(0,B.pHP-dmg);
+    B.wrongs.push({p:q.prompt+(q.code?' (có đoạn code)':''),e:q.exp+(extra?' '+extra:'')});
+  }
+  const end=B.mHP<=0?'win':B.pHP<=0?'lose':null;
+  // explanation
+  const h=$('#expH'),box=$('#qexp');
+  box.className='exp'+(ok?'':' bad');
+  h.textContent=ok?(crit?'⚡ Chí mạng! Quái mất '+dmg+' máu':'✅ Chính xác! Quái mất '+dmg+' máu'):'❌ Sai rồi! Bạn mất '+dmg+' máu';
+  $('#expB').innerHTML='<p>'+q.exp+'</p>'+(extra?'<p>'+extra+'</p>':'');
+  box.hidden=false;
+  const nb=$('#qnext');
+  nb.textContent=end==='win'?'Hạ gục quái vật! 🏆':end==='lose'?'Xem kết quả':'Câu tiếp theo ➜';
+  nb.hidden=false;
+  nb.onclick=()=>{end?finishBattle(end==='win'):nextQ()};
+  box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'});
+  // animation
+  const pl=$('#plFig'),mn=$('#mnFig');
+  if(ok){
+    fire(pl,mn,crit?'⚡':'✨').then(()=>{
+      hit(mn);floatTxt(mn,'−'+dmg,crit?'crit':'');say($('#mnSay'),pick(m.hit));
+      if(crit)floatTxt(pl,'+10 máu','heal');
+      hpUI();if(end==='win')mn.classList.add('dead');
+    });
+  }else{
+    say($('#mnSay'),pick(m.win));
+    fire(mn,pl,'💥').then(()=>{
+      hit(pl);floatTxt(pl,'−'+dmg);
+      const a=$('#arena');a.classList.remove('quake');void a.offsetWidth;a.classList.add('quake');
+      hpUI();if(end==='lose')pl.classList.add('dead');
+    });
+  }
+  hpUI();
+}
+
+function finishBattle(win){
+  const i=B.i,m=B.m;
+  let stars=0;
+  if(win){stars=B.pHP>=70?3:B.pHP>=40?2:1;if(stars>(G.stars[i]||0))G.stars[i]=stars;G.unlocked=Math.max(G.unlocked,Math.min(MON.length,i+2))}
+  save();buildMap();
+  const last=i===MON.length-1;
+  $('#rEm').textContent=win?(last?'👑':'🏆'):'💀';
+  $('#rTitle').textContent=win?(last?'Bạn đã chinh phục Rừng Cây Nhị Phân!':'Hạ gục '+m.name+'!'):'Pháp sư gục ngã…';
+  $('#rStars').textContent='★'.repeat(stars)+'☆'.repeat(3-stars);
+  $('#rStats').innerHTML=`<span>Đúng ${B.correct}/${B.total} câu</span><span>Máu còn lại ${B.pHP}</span>`;
+  $('#rMsg').textContent=win?(stars===3?'Xuất sắc! Gần như không bị quái chạm tới.':stars===2?'Khá lắm! Xem lại các câu sai bên dưới để lên 3 sao nhé.':'Thắng sát nút! Đọc kỹ phần giải thích bên dưới rồi thử lấy thêm sao.'):'Đừng nản. Đọc phần giải thích các câu sai bên dưới, xem lại bí kíp rồi đấu lại nhé.';
+  let btns='';
+  if(win&&!last)btns+='<button class="btn go" id="rNext">Màn tiếp theo ➜</button>';
+  btns+='<button class="btn" id="rAgain">Đấu lại</button><button class="btn ghost" id="rMapBtn">Bản đồ</button>';
+  $('#rBtns').innerHTML=btns;
+  if($('#rNext'))$('#rNext').onclick=()=>openIntro(i+1);
+  $('#rAgain').onclick=()=>startBattle(i);
+  $('#rMapBtn').onclick=()=>go('map');
+  $('#rMist').innerHTML=B.wrongs.length?'<h3>📝 Sổ tay các câu đã sai ('+B.wrongs.length+')</h3>'+B.wrongs.map(w=>`<details><summary>${esc(w.p)}</summary><div class="body">${w.e}</div></details>`).join(''):'<h3>🎯 Bạn không sai câu nào!</h3>';
+  go('res');
+}
+
+buildMap();
+})();
+</script>
+</body>
+</html>
